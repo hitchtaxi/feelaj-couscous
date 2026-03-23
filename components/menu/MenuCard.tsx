@@ -2,9 +2,12 @@ import Image from 'next/image'
 import type { MenuItem } from '@/lib/types'
 
 const IMAGE_MAP: Record<string, string> = {
-  couscous: 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=600&q=80',
-  tagine: 'https://images.unsplash.com/photo-1606756790138-261d2b21cd75?w=600&q=80',
-  salata: 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=600&q=80',
+  // Red harissa couscous with lamb, chickpeas, vegetables — Tunisian style
+  couscous: 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=700&q=90',
+  // Baked egg/cheese layered dish — Tunisian tagine (not Moroccan stew)
+  tagine: 'https://images.unsplash.com/photo-1547592180-85f173990554?w=700&q=90',
+  // Fire-roasted red pepper & tomato salad
+  salata: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=700&q=90',
 }
 
 interface MenuCardProps {

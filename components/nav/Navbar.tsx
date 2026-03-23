@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import Logo from '@/components/brand/Logo'
 
 const NAV_LINKS = [
   { label: 'Menu', href: '#menu' },
@@ -28,8 +29,8 @@ export default function Navbar() {
         }}
       >
         {/* Logo */}
-        <a href="#" className="font-display text-xl font-semibold tracking-widest text-feelaj-gold">
-          FEELAJ COUSCOUS
+        <a href="#" aria-label="Feelaj Couscous home">
+          <Logo size="sm" variant="mark" className="opacity-90 hover:opacity-100 transition-opacity" />
         </a>
 
         {/* Desktop links */}

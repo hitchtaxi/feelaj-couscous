@@ -1,13 +1,13 @@
+import Logo from '@/components/brand/Logo'
+
 export default function Footer() {
   return (
-    <footer className="bg-feelaj-black border-t border-white/5 py-10 px-6">
-      <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-        <div>
-          <p className="font-display text-lg text-feelaj-gold tracking-widest">FEELAJ COUSCOUS</p>
-          <p className="font-body text-feelaj-text/30 text-xs mt-1 tracking-wider">
-            From the kitchens of northwest Tunisia to your door.
-          </p>
-        </div>
+    <footer className="bg-feelaj-black border-t border-white/5 py-14 px-6">
+      <div className="max-w-6xl mx-auto flex flex-col items-center gap-8">
+        {/* Full logo centrepiece */}
+        <Logo size="md" variant="full" />
+
+        {/* Nav */}
         <nav className="flex gap-8">
           {[
             { label: 'Menu', href: '#menu' },
@@ -24,8 +24,12 @@ export default function Footer() {
             </a>
           ))}
         </nav>
-        <p className="font-body text-feelaj-text/20 text-xs tracking-wider">
-          Sydney, Australia
+
+        {/* Divider */}
+        <div className="w-24 h-px bg-feelaj-gold/20" />
+
+        <p className="font-body text-feelaj-text/20 text-xs tracking-[0.2em] text-center">
+          From the kitchens of northwest Tunisia to your door. Sydney, Australia.
         </p>
       </div>
     </footer>
