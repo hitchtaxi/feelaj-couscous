@@ -16,10 +16,10 @@ html {
 }
 
 body {
-  background-color: #0a0a0a;
-  color: #f5f0e8;
+  background-color: var(--color-feelaj-black);
+  color: var(--color-feelaj-text);
 }
 
 ::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #0a0a0a; }
-::-webkit-scrollbar-thumb { background: #c9a84c; border-radius: 3px; }
+::-webkit-scrollbar-track { background: var(--color-feelaj-black); }
+::-webkit-scrollbar-thumb { background: var(--color-feelaj-gold); border-radius: 3px; }
