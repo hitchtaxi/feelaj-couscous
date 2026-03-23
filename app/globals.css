@@ -1,6 +1,15 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-feelaj-black: #0a0a0a;
+  --color-feelaj-surface: #141414;
+  --color-feelaj-cream: #faf8f4;
+  --color-feelaj-text: #f5f0e8;
+  --color-feelaj-gold: #c9a84c;
+  --color-feelaj-red: #8b1a1a;
+  --font-family-display: var(--font-cormorant), Georgia, serif;
+  --font-family-body: var(--font-dm-sans), system-ui, sans-serif;
+}
 
 html {
   scroll-behavior: smooth;
