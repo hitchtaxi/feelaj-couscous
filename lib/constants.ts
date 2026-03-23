@@ -2,22 +2,6 @@ import type { Deal, MenuItem, Drink, Ingredient } from './types'
 
 export const DEALS: Deal[] = [
   {
-    id: 'solo',
-    name: 'Solo Meal',
-    description: 'The full experience, just for you.',
-    price: 22,
-    includes: ['Couscous', 'Tunisian Tagine', 'Salata Mishweya', 'Salad'],
-    drinks: 1,
-  },
-  {
-    id: 'couple',
-    name: 'Meal for Two',
-    description: 'Perfect for couples. No kids required.',
-    price: 38,
-    includes: ['Couscous', 'Tunisian Tagine', 'Salata Mishweya', 'Salad'],
-    drinks: 2,
-  },
-  {
     id: 'family-4',
     name: 'Family of 4',
     description: 'A proper family spread.',
@@ -95,14 +79,11 @@ export const DRINKS: Drink[] = [
 ]
 
 export const INGREDIENTS: Ingredient[] = [
-  { id: 'semolina', label: 'Semolina', detail: 'hand-rolled, fine-grain', angle: 330, distance: 220 },
-  { id: 'harissa', label: 'Harissa', detail: 'fire-roasted Tunisian chilli paste', angle: 30, distance: 240 },
-  { id: 'chickpeas', label: 'Chickpeas', detail: 'slow-soaked, tender', angle: 70, distance: 230 },
-  { id: 'sultanas', label: 'Sultanas', detail: 'for sweetness & depth', angle: 120, distance: 220 },
-  { id: 'lamb', label: 'Lamb', detail: 'slow-cooked on the bone', angle: 160, distance: 240 },
-  { id: 'saffron', label: 'Saffron broth', detail: 'golden, aromatic', angle: 210, distance: 230 },
-  { id: 'ras-el-hanout', label: 'Ras el Hanout', detail: '12-spice blend', angle: 255, distance: 220 },
-  { id: 'coriander', label: 'Fresh coriander', detail: 'finish & fragrance', angle: 295, distance: 230 },
+  { id: 'chickpeas', label: 'Chickpeas', detail: 'slow-soaked, tender', angle: 40, distance: 240 },
+  { id: 'lamb', label: 'Lamb', detail: 'on the bone, fall-apart tender', angle: 110, distance: 250 },
+  { id: 'harissa', label: 'Harissa broth', detail: 'deep red, slow-cooked', angle: 180, distance: 240 },
+  { id: 'sultanas', label: 'Sultanas', detail: 'sweet depth', angle: 250, distance: 240 },
+  { id: 'semolina', label: 'Semolina', detail: 'hand-rolled, fine-grain', angle: 320, distance: 230 },
 ]
 
 export const WHATSAPP_NUMBER = '+61400000000'

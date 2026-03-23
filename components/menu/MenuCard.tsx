@@ -3,8 +3,8 @@ import type { MenuItem } from '@/lib/types'
 
 const IMAGE_MAP: Record<string, string> = {
   couscous: 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=600&q=80',
-  tagine: 'https://images.unsplash.com/photo-1617093727343-374698b1b08d?w=600&q=80',
-  salata: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&q=80',
+  tagine: 'https://images.unsplash.com/photo-1606756790138-261d2b21cd75?w=600&q=80',
+  salata: 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=600&q=80',
 }
 
 interface MenuCardProps {
