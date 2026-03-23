@@ -1,10 +1,13 @@
 'use client'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
+import SparklesText from '@/components/ui/SparklesText'
+import Meteors from '@/components/ui/Meteors'
+import ShimmerButton from '@/components/ui/ShimmerButton'
 
 export default function Hero() {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-feelaj-black">
+    <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden bg-feelaj-black">
       {/* Background image with overlay */}
       <div className="absolute inset-0 z-0">
         <Image
@@ -16,6 +19,9 @@ export default function Hero() {
         />
         <div className="absolute inset-0 bg-gradient-to-b from-feelaj-black/60 via-transparent to-feelaj-black" />
       </div>
+
+      {/* Shooting meteors */}
+      <Meteors count={18} />
 
       {/* Content */}
       <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
@@ -35,7 +41,9 @@ export default function Hero() {
           className="font-display text-6xl md:text-8xl font-light text-feelaj-text leading-tight mb-6"
         >
           Couscous, the way<br />
-          <span className="italic text-feelaj-gold">it was meant to be.</span>
+          <SparklesText className="italic text-feelaj-gold" sparkleCount={14}>
+            it was meant to be.
+          </SparklesText>
         </motion.h1>
 
         <motion.p
@@ -53,18 +61,12 @@ export default function Hero() {
           transition={{ delay: 0.8 }}
           className="flex flex-col sm:flex-row gap-4 justify-center"
         >
-          <a
-            href="#contact"
-            className="font-body tracking-widest text-sm px-8 py-4 bg-feelaj-gold text-feelaj-black hover:bg-feelaj-gold/90 transition-all"
-          >
+          <ShimmerButton href="#contact" variant="gold">
             ORDER NOW
-          </a>
-          <a
-            href="#deals"
-            className="font-body tracking-widest text-sm px-8 py-4 border border-feelaj-text/40 text-feelaj-text hover:border-feelaj-gold hover:text-feelaj-gold transition-all"
-          >
+          </ShimmerButton>
+          <ShimmerButton href="#deals" variant="outline">
             SEE OUR DEALS
-          </a>
+          </ShimmerButton>
         </motion.div>
       </div>
 

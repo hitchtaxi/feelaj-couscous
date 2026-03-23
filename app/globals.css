@@ -53,3 +53,22 @@ body::after {
 .glow-pulse {
   animation: gold-pulse 3s ease-in-out infinite;
 }
+
+/* Sparkle pop animation */
+@keyframes sparkle-pop {
+  0%   { transform: scale(0) rotate(0deg); opacity: 0; }
+  20%  { transform: scale(1) rotate(45deg); opacity: 1; }
+  80%  { transform: scale(0.8) rotate(90deg); opacity: 0.8; }
+  100% { transform: scale(0) rotate(135deg); opacity: 0; }
+}
+
+/* Meteor shooting star */
+@keyframes meteor-fall {
+  0%   { transform: rotate(215deg) translateX(0); opacity: 1; }
+  70%  { opacity: 1; }
+  100% { transform: rotate(215deg) translateX(-600px); opacity: 0; }
+}
+
+.animate-meteor {
+  animation: meteor-fall linear infinite;
+}
