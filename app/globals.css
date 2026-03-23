@@ -23,3 +23,11 @@ body {
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--color-feelaj-black); }
 ::-webkit-scrollbar-thumb { background: var(--color-feelaj-gold); border-radius: 3px; }
+
+.section-divider {
+  width: 60px;
+  height: 1px;
+  background: var(--color-feelaj-gold);
+  opacity: 0.4;
+  margin: 0 auto;
+}
