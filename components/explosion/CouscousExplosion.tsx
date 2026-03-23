@@ -1,70 +1,28 @@
 'use client'
 import { motion, useInView } from 'framer-motion'
 import { useRef } from 'react'
-import Image from 'next/image'
 
 const DEG2RAD = Math.PI / 180
-const PLATE_R = 155   // plate radius px (inside a 310px circle)
-const STAGE    = 660  // stage square size
+const STAGE   = 680
+const C       = STAGE / 2          // centre of stage (340)
+const PLATE_R = 130                // drawn plate radius
+const EXPLODE  = 270               // how far out ingredients fly
 
-interface Ingredient {
-  id: string
-  label: string
-  detail: string
-  angle: number          // degrees, 0 = right, 90 = down
-  fill: string
-  stroke: string
-  shape: 'grain' | 'meat' | 'legume' | 'sultana'
-  delay: number
+interface Ing {
+  id: string; label: string; detail: string
+  angle: number; delay: number
 }
 
-const INGREDIENTS: Ingredient[] = [
-  {
-    id: 'couscous',
-    label: 'Couscous Grain',
-    detail: 'Hand-rolled semolina',
-    angle: -55,
-    fill: '#c4a030',
-    stroke: '#f0d070',
-    shape: 'grain',
-    delay: 0,
-  },
-  {
-    id: 'lamb',
-    label: 'Lamb',
-    detail: 'On the bone',
-    angle: 40,
-    fill: '#6b2020',
-    stroke: '#e07060',
-    shape: 'meat',
-    delay: 0.15,
-  },
-  {
-    id: 'chickpeas',
-    label: 'Chickpeas',
-    detail: 'Slow-soaked, tender',
-    angle: 150,
-    fill: '#a07828',
-    stroke: '#e8c870',
-    shape: 'legume',
-    delay: 0.30,
-  },
-  {
-    id: 'sultanas',
-    label: 'Sultanas',
-    detail: 'Sweet dark depth',
-    angle: 248,
-    fill: '#3a0e20',
-    stroke: '#c070a0',
-    shape: 'sultana',
-    delay: 0.45,
-  },
+const INGREDIENTS: Ing[] = [
+  { id: 'grain',     label: 'Couscous',   detail: 'Hand-rolled semolina',   angle: -55,  delay: 0    },
+  { id: 'lambchop',  label: 'Lamb Chop',  detail: 'On the bone, fall-apart', angle:  40,  delay: 0.14 },
+  { id: 'chickpea',  label: 'Chickpeas',  detail: 'Slow-soaked, tender',     angle: 155,  delay: 0.28 },
+  { id: 'sultana',   label: 'Sultanas',   detail: 'Sweet dark depth',        angle: 250,  delay: 0.42 },
 ]
 
 export default function CouscousExplosion() {
-  const ref = useRef<HTMLElement>(null)
-  const isInView = useInView(ref, { once: true, margin: '-80px' })
-  const center = STAGE / 2
+  const ref     = useRef<HTMLElement>(null)
+  const inView  = useInView(ref, { once: true, margin: '-80px' })
 
   return (
     <section
@@ -72,16 +30,16 @@ export default function CouscousExplosion() {
       ref={ref}
       className="relative bg-feelaj-black flex flex-col items-center justify-center overflow-hidden py-20"
     >
-      {/* Radial ambient */}
+      {/* Glow backdrop */}
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-        <div className="w-[520px] h-[520px] rounded-full bg-feelaj-gold/5 blur-3xl" />
+        <div className="w-[480px] h-[480px] rounded-full bg-feelaj-gold/6 blur-3xl" />
       </div>
 
       {/* Headline */}
       <motion.div
-        className="relative z-10 text-center mb-12 px-4"
-        initial={{ opacity: 0, y: 24 }}
-        animate={isInView ? { opacity: 1, y: 0 } : {}}
+        className="relative z-10 text-center mb-10 px-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={inView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.7 }}
       >
         <p className="font-body text-feelaj-gold/60 tracking-[0.3em] text-xs uppercase mb-4">
@@ -93,119 +51,77 @@ export default function CouscousExplosion() {
         </h2>
       </motion.div>
 
-      {/* ── Explosion stage ── */}
+      {/* ── Stage ── */}
       <div
         className="relative mx-auto"
         style={{
           width: STAGE,
           height: STAGE,
-          /* scale down on small screens */
-          maxWidth: '100vw',
-          transform: 'scale(var(--stage-scale, 1))',
+          transform: 'scale(var(--xscale,1))',
+          transformOrigin: 'top center',
         }}
       >
-        {/* CSS custom prop to shrink on mobile */}
         <style>{`
-          @media (max-width: 720px) {
-            :root { --stage-scale: 0.55; }
-          }
-          @media (min-width: 721px) and (max-width: 900px) {
-            :root { --stage-scale: 0.78; }
-          }
+          @media(max-width:720px){ :root{--xscale:0.52} }
+          @media(min-width:721px) and (max-width:920px){ :root{--xscale:0.78} }
         `}</style>
 
-        {/* Plate — lives dead-centre of stage */}
+        {/* ── Plate SVG (static, centred) ── */}
         <motion.div
           className="absolute"
-          style={{
-            left: center - PLATE_R,
-            top: center - PLATE_R,
-            width: PLATE_R * 2,
-            height: PLATE_R * 2,
-            perspective: 900,
-          }}
-          initial={{ opacity: 0, scale: 0.7 }}
-          animate={isInView ? { opacity: 1, scale: 1 } : {}}
-          transition={{ duration: 0.9, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+          style={{ left: C - PLATE_R, top: C - PLATE_R }}
+          initial={{ opacity: 0, scale: 0.75 }}
+          animate={inView ? { opacity: 1, scale: 1 } : {}}
+          transition={{ duration: 0.9, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
         >
-          {/* 3D tilt */}
-          <div
-            className="w-full h-full rounded-full overflow-hidden"
-            style={{
-              transform: 'rotateX(22deg)',
-              boxShadow:
-                '0 40px 100px rgba(0,0,0,0.85), 0 0 0 2px rgba(201,168,76,0.35), 0 0 60px rgba(201,168,76,0.12)',
-            }}
-          >
-            <Image
-              src="https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=700&q=90"
-              alt="Tunisian couscous plate"
-              fill
-              className="object-cover scale-110"
-              priority
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-feelaj-black/30" />
-          </div>
-
-          {/* Sheen ring */}
-          <div
-            className="absolute inset-0 rounded-full pointer-events-none"
-            style={{
-              background:
-                'radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.08) 0%, transparent 55%)',
-            }}
-          />
+          <PlateIllustration r={PLATE_R} />
         </motion.div>
 
-        {/* ── Ingredients ── */}
-        {INGREDIENTS.map((ing) => {
-          const rad      = ing.angle * DEG2RAD
-          const cosA     = Math.cos(rad)
-          const sinA     = Math.sin(rad)
-          // where the blob sits at rest (on/near plate surface)
-          const restX    = center + cosA * (PLATE_R * 0.62) - 36
-          const restY    = center + sinA * (PLATE_R * 0.62) - 36
-          // where it flies to when exploded
-          const explDX   = cosA * (PLATE_R + 185)
-          const explDY   = sinA * (PLATE_R + 185)
+        {/* ── Animated ingredients ── */}
+        {INGREDIENTS.map(ing => {
+          const rad   = ing.angle * DEG2RAD
+          const cosA  = Math.cos(rad)
+          const sinA  = Math.sin(rad)
+          // rest position: near the edge of the couscous mound
+          const restX = C + cosA * (PLATE_R * 0.52) - 40
+          const restY = C + sinA * (PLATE_R * 0.52) - 40
+          // explosion target
+          const dx = cosA * EXPLODE
+          const dy = sinA * EXPLODE
 
           return (
             <motion.div
               key={ing.id}
-              className="absolute"
-              style={{ left: restX, top: restY, zIndex: 20 }}
-              initial={{ opacity: 0, x: 0, y: 0 }}
-              animate={
-                isInView
-                  ? {
-                      opacity: [0, 1, 1, 1, 1],
-                      x: [0, explDX * 0.15, explDX, explDX * 0.05, 0],
-                      y: [0, explDY * 0.15, explDY, explDY * 0.05, 0],
-                      scale: [1, 1.1, 1.25, 1.1, 1],
-                    }
-                  : { opacity: 0 }
-              }
+              className="absolute z-20"
+              style={{ left: restX, top: restY }}
+              initial={{ opacity: 0 }}
+              animate={inView ? {
+                opacity: [0, 1, 1, 1, 1, 1],
+                x: [0, dx * 0.05, dx, dx * 0.98, dx * 0.03, 0],
+                y: [0, dy * 0.05, dy, dy * 0.98, dy * 0.03, 0],
+                scale:[1, 1,  1.3,  1.25,  1.05,  1],
+              } : { opacity: 0 }}
               transition={{
-                delay: 0.6 + ing.delay,
-                duration: 4.2,
-                times: [0, 0.08, 0.35, 0.65, 1],
-                ease: 'easeInOut',
-                repeat: Infinity,
-                repeatDelay: 0.6,
+                delay:       0.5 + ing.delay,
+                duration:    4.0,
+                times:       [0, 0.06, 0.30, 0.55, 0.82, 1],
+                ease:        'easeInOut',
+                repeat:      Infinity,
+                repeatDelay: 0.8,
               }}
             >
-              <IngredientBlob ing={ing} />
+              <IngredientCard ing={ing} />
             </motion.div>
           )
         })}
       </div>
 
-      {/* Bottom badge */}
+      {/* Badge */}
       <motion.p
-        className="relative z-10 mt-4 font-body text-sm tracking-[0.2em] text-feelaj-text/30 text-center px-4"
+        className="relative z-10 mt-2 font-body text-sm tracking-[0.2em] text-feelaj-text/30 text-center px-4"
         initial={{ opacity: 0 }}
-        animate={isInView ? { opacity: 1 } : {}}
-        transition={{ delay: 1.6 }}
+        animate={inView ? { opacity: 1 } : {}}
+        transition={{ delay: 1.4 }}
       >
         Not Moroccan. Not Algerian.{' '}
         <span className="text-feelaj-gold">Tunisian.</span>
@@ -214,207 +130,310 @@ export default function CouscousExplosion() {
   )
 }
 
-// ── One ingredient blob + dashed arrow + label ───────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// PLATE ILLUSTRATION — white ceramic plate with couscous mound
+// ─────────────────────────────────────────────────────────────────────────────
+function PlateIllustration({ r }: { r: number }) {
+  const d = r * 2
+  return (
+    <svg width={d} height={d} viewBox={`0 0 ${d} ${d}`}>
+      <defs>
+        {/* plate shadow */}
+        <radialGradient id="plateShadow" cx="50%" cy="62%" r="50%">
+          <stop offset="0%"   stopColor="#000" stopOpacity="0" />
+          <stop offset="100%" stopColor="#000" stopOpacity="0.55" />
+        </radialGradient>
+        {/* couscous grain texture */}
+        <pattern id="grainPat" x="0" y="0" width="6" height="6" patternUnits="userSpaceOnUse">
+          <circle cx="1.5" cy="1.5" r="1"  fill="#c8a030" fillOpacity="0.7"/>
+          <circle cx="4.5" cy="4"   r="0.8" fill="#d4b040" fillOpacity="0.5"/>
+        </pattern>
+      </defs>
 
-function IngredientBlob({ ing }: { ing: Ingredient }) {
+      {/* Drop shadow */}
+      <ellipse cx={r} cy={r + 18} rx={r * 0.88} ry={r * 0.22}
+        fill="rgba(0,0,0,0.5)" />
+
+      {/* Plate body */}
+      <circle cx={r} cy={r} r={r - 2}
+        fill="#f5f0e8"
+        stroke="#e0d8cc" strokeWidth="1.5" />
+
+      {/* Rim inner shadow ring */}
+      <circle cx={r} cy={r} r={r - 14}
+        fill="none" stroke="rgba(0,0,0,0.07)" strokeWidth="8" />
+
+      {/* Plate inner well */}
+      <circle cx={r} cy={r} r={r - 18} fill="#ede8df" />
+
+      {/* Couscous mound base — reddish-orange harissa-stained base */}
+      <ellipse cx={r} cy={r + 8} rx={r * 0.65} ry={r * 0.52}
+        fill="#b85020" fillOpacity="0.55" />
+
+      {/* Couscous golden mound */}
+      <ellipse cx={r} cy={r + 4} rx={r * 0.60} ry={r * 0.46}
+        fill="#d4a830" />
+      <ellipse cx={r} cy={r + 2} rx={r * 0.55} ry={r * 0.40}
+        fill="#e0b840" />
+      <ellipse cx={r} cy={r} rx={r * 0.50} ry={r * 0.35}
+        fill="url(#grainPat)" />
+
+      {/* Grain texture overlay */}
+      <ellipse cx={r} cy={r} rx={r * 0.50} ry={r * 0.35}
+        fill="url(#grainPat)" fillOpacity="0.9" />
+
+      {/* Highlight on mound */}
+      <ellipse cx={r - 14} cy={r - 18} rx={28} ry={16}
+        fill="rgba(255,240,180,0.18)" />
+
+      {/* Shadow under texture */}
+      <ellipse cx={r} cy={r + 6} rx={r * 0.48} ry={r * 0.32}
+        fill="url(#plateShadow)" fillOpacity="0.3" />
+
+      {/* A few harissa drizzle dots */}
+      {[[r+22,r-28],[r-30,r-10],[r+10,r+25],[r-18,r+30]].map(([cx,cy],i)=>(
+        <circle key={i} cx={cx} cy={cy} r={3.5}
+          fill="#8b2010" fillOpacity={0.7 - i*0.08} />
+      ))}
+
+      {/* Rim sheen */}
+      <path
+        d={`M ${r * 0.32 + r},${r - r * 0.94} A ${r * 0.97} ${r * 0.97} 0 0 1 ${r + r * 0.68},${r - r * 0.7}`}
+        fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="6" strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// INGREDIENT CARD — drawing + arrow + label
+// ─────────────────────────────────────────────────────────────────────────────
+function IngredientCard({ ing }: { ing: Ing }) {
   const rad  = ing.angle * DEG2RAD
   const cosA = Math.cos(rad)
   const sinA = Math.sin(rad)
 
-  // Arrow: from circle edge outward to label start
-  const blobR     = 36
-  const arrowLen  = 52
-  const x1 = blobR + cosA * blobR
-  const y1 = blobR + sinA * blobR
-  const x2 = blobR + cosA * (blobR + arrowLen)
-  const y2 = blobR + sinA * (blobR + arrowLen)
+  // Arrow from blob edge toward label
+  const size  = 80
+  const half  = size / 2
+  const edgeX = half + cosA * (half - 4)
+  const edgeY = half + sinA * (half - 4)
+  const tipX  = half + cosA * (half + 44)
+  const tipY  = half + sinA * (half + 44)
 
-  // Label anchor — further out along same ray
-  const lx = blobR + cosA * (blobR + arrowLen + 6)
-  const ly = blobR + sinA * (blobR + arrowLen + 6)
-  const labelLeft = cosA >= 0 ? lx : lx - 110
-  const labelTop  = sinA >= 0 ? ly - 4 : ly - 34
+  // Label placement
+  const lx = half + cosA * (half + 50) + (cosA >= 0 ? 0 : -116)
+  const ly = half + sinA * (half + 50) + (sinA >= 0 ? -4 : -36)
+
+  const COLORS: Record<string, { bg: string; rim: string; glow: string }> = {
+    grain:    { bg: '#1a1200', rim: '#d4a830', glow: '#c9a84c' },
+    lambchop: { bg: '#1a0606', rim: '#c07050', glow: '#e08060' },
+    chickpea: { bg: '#120e00', rim: '#c49830', glow: '#e0b840' },
+    sultana:  { bg: '#12040c', rim: '#a04070', glow: '#c06090' },
+  }
+  const col = COLORS[ing.id] ?? COLORS.grain
 
   return (
-    <div style={{ position: 'relative', width: blobR * 2, height: blobR * 2 }}>
-
-      {/* SVG: dashed arrow */}
-      <svg
-        style={{ position: 'absolute', inset: 0, overflow: 'visible', pointerEvents: 'none' }}
-        width={blobR * 2}
-        height={blobR * 2}
-      >
+    <div style={{ position: 'relative', width: size, height: size }}>
+      {/* Arrow SVG */}
+      <svg style={{ position:'absolute', inset:0, overflow:'visible', pointerEvents:'none' }}
+        width={size} height={size}>
         <defs>
-          <marker
-            id={`hd-${ing.id}`}
-            markerWidth="7" markerHeight="7"
-            refX="6" refY="3.5"
-            orient="auto"
-          >
-            <polyline
-              points="0,0 6,3.5 0,7"
-              fill="none"
-              stroke={ing.stroke}
-              strokeWidth="1.5"
-              strokeOpacity="0.85"
-            />
+          <marker id={`arr-${ing.id}`} markerWidth="8" markerHeight="8"
+            refX="6" refY="4" orient="auto">
+            <polyline points="0,0 6,4 0,8" fill="none"
+              stroke={col.rim} strokeWidth="1.5" strokeOpacity="0.9"/>
           </marker>
         </defs>
-        <line
-          x1={x1} y1={y1}
-          x2={x2} y2={y2}
-          stroke={ing.stroke}
-          strokeWidth="1.5"
-          strokeOpacity="0.75"
+        <line x1={edgeX} y1={edgeY} x2={tipX} y2={tipY}
+          stroke={col.rim} strokeWidth="1.5" strokeOpacity="0.8"
           strokeDasharray="5 3"
-          markerEnd={`url(#hd-${ing.id})`}
-        />
+          markerEnd={`url(#arr-${ing.id})`} />
       </svg>
 
-      {/* Circle blob */}
-      <div
-        style={{
-          position: 'absolute',
-          width: blobR * 2,
-          height: blobR * 2,
-          borderRadius: '50%',
-          background: `radial-gradient(circle at 32% 28%, ${lighten(ing.fill, 0.4)}, ${ing.fill} 70%)`,
-          boxShadow: `0 6px 28px ${ing.fill}90, 0 0 0 2px ${ing.stroke}55`,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <IngredientShape shape={ing.shape} color={ing.stroke} />
+      {/* Circle container */}
+      <div style={{
+        width: size, height: size, borderRadius: '50%',
+        background: col.bg,
+        border: `2px solid ${col.rim}70`,
+        boxShadow: `0 0 28px ${col.glow}60, 0 8px 24px rgba(0,0,0,0.6)`,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        overflow: 'hidden',
+      }}>
+        {ing.id === 'grain'    && <GrainSVG />}
+        {ing.id === 'lambchop' && <LambChopSVG />}
+        {ing.id === 'chickpea' && <ChickpeaSVG />}
+        {ing.id === 'sultana'  && <SultanaSVG />}
       </div>
 
-      {/* Text label */}
-      <div
-        style={{
-          position: 'absolute',
-          left: labelLeft,
-          top: labelTop,
-          width: 110,
-          pointerEvents: 'none',
-          textAlign: cosA >= 0 ? 'left' : 'right',
-        }}
-      >
-        <p
-          style={{
-            fontFamily: 'var(--font-dm-sans), system-ui',
-            fontSize: 11,
-            fontWeight: 600,
-            letterSpacing: '0.08em',
-            color: ing.stroke,
-            lineHeight: 1.3,
-          }}
-        >
-          {ing.label}
-        </p>
-        <p
-          style={{
-            fontFamily: 'var(--font-dm-sans), system-ui',
-            fontSize: 9.5,
-            color: 'rgba(245,240,232,0.45)',
-            lineHeight: 1.3,
-            marginTop: 2,
-          }}
-        >
-          {ing.detail}
-        </p>
+      {/* Label */}
+      <div style={{
+        position: 'absolute',
+        left: lx, top: ly,
+        width: 116,
+        pointerEvents: 'none',
+        textAlign: cosA >= 0 ? 'left' : 'right',
+      }}>
+        <p style={{
+          fontFamily: 'var(--font-dm-sans, system-ui)',
+          fontSize: 12, fontWeight: 700,
+          letterSpacing: '0.07em',
+          color: col.rim, lineHeight: 1.3,
+        }}>{ing.label}</p>
+        <p style={{
+          fontFamily: 'var(--font-dm-sans, system-ui)',
+          fontSize: 9.5, color: 'rgba(245,240,232,0.45)',
+          lineHeight: 1.3, marginTop: 2,
+        }}>{ing.detail}</p>
       </div>
     </div>
   )
 }
 
-// ── SVG shapes per ingredient ────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// SVG ingredient illustrations
+// ─────────────────────────────────────────────────────────────────────────────
 
-function IngredientShape({ shape, color }: { shape: string; color: string }) {
-  if (shape === 'grain') {
-    // Golden semolina pellets
-    const dots = [
-      [9,9],[15,7],[21,10],[27,8],[10,16],[17,15],[24,16],
-      [12,22],[20,23],[27,21],[9,28],[16,29],[24,27],
-    ]
-    return (
-      <svg width={36} height={36} viewBox="0 0 36 36">
-        {dots.map(([cx, cy], i) => (
-          <ellipse key={i} cx={cx} cy={cy} rx={2.4} ry={1.6}
-            fill={color} fillOpacity={0.75 + (i % 3) * 0.08}
-            transform={`rotate(${i * 27} ${cx} ${cy})`}
-          />
-        ))}
-      </svg>
-    )
-  }
-
-  if (shape === 'meat') {
-    // Lamb chunk with bone
-    return (
-      <svg width={36} height={36} viewBox="0 0 36 36">
-        {/* meat chunk */}
-        <ellipse cx={20} cy={22} rx={13} ry={9}
-          fill={color} fillOpacity={0.9}
-        />
-        {/* bone shaft */}
-        <rect x={14} y={8} width={4} height={15} rx={2}
-          fill={color} fillOpacity={0.65}
-        />
-        {/* bone knob */}
-        <circle cx={16} cy={7} r={5.5}
-          fill="none" stroke={color} strokeWidth={2} strokeOpacity={0.7}
-        />
-        <circle cx={16} cy={7} r={2.5}
-          fill={color} fillOpacity={0.6}
-        />
-        {/* marbling */}
-        <path d="M11,20 Q16,17 21,21 Q24,19 27,22"
-          stroke="rgba(0,0,0,0.25)" strokeWidth={1.2} fill="none"
-        />
-      </svg>
-    )
-  }
-
-  if (shape === 'legume') {
-    // Three chickpeas
-    return (
-      <svg width={36} height={36} viewBox="0 0 36 36">
-        <circle cx={12} cy={21} r={7.5} fill={color} fillOpacity={0.92} />
-        <circle cx={24} cy={21} r={7.5} fill={color} fillOpacity={0.92} />
-        <circle cx={18} cy={13} r={7.5} fill={color} fillOpacity={0.88} />
-        {/* crease */}
-        <path d="M9,23 Q12,26.5 15,23" stroke="rgba(0,0,0,0.22)" strokeWidth={1.2} fill="none" />
-        <path d="M21,23 Q24,26.5 27,23" stroke="rgba(0,0,0,0.22)" strokeWidth={1.2} fill="none" />
-        <path d="M15,15 Q18,18.5 21,15" stroke="rgba(0,0,0,0.22)" strokeWidth={1.2} fill="none" />
-      </svg>
-    )
-  }
-
-  if (shape === 'sultana') {
-    // Small oval raisins clustered
-    const raisins: [number, number, number][] = [
-      [11,14,15],[22,13,10],[17,22,12],[8,25,18],[26,23,8],[15,30,20],
-    ]
-    return (
-      <svg width={36} height={36} viewBox="0 0 36 36">
-        {raisins.map(([cx, cy, rot], i) => (
-          <ellipse key={i} cx={cx} cy={cy} rx={4.5} ry={3}
-            fill={color} fillOpacity={0.85 - i * 0.04}
-            transform={`rotate(${rot} ${cx} ${cy})`}
-          />
-        ))}
-      </svg>
-    )
-  }
-
-  return null
+function GrainSVG() {
+  // Golden semolina pellets — tiny elongated grains in a pile
+  const grains: [number,number,number][] = [
+    [22,14,  8],[34,16, 50],[46,14, 120],[58,16, 20],[30,22,  90],
+    [42,21, 140],[54,22,  60],[18,28, 30],[28,29, 100],[40,28,  15],
+    [52,30, 80],[62,27, 150],[24,36, 55],[36,35, 130],[48,36,  40],
+    [58,35,  95],[30,42,  20],[42,41, 110],[54,42,  65],[46,48, 140],
+  ]
+  return (
+    <svg width="80" height="62" viewBox="0 0 80 62">
+      {grains.map(([cx,cy,rot],i)=>(
+        <ellipse key={i} cx={cx} cy={cy} rx={4.2} ry={2}
+          fill={i%3===0?'#f0d060':i%3===1?'#d4a830':'#e8c050'}
+          fillOpacity={0.85+Math.sin(i)*0.12}
+          transform={`rotate(${rot} ${cx} ${cy})`}/>
+      ))}
+      {/* Highlight */}
+      <ellipse cx={36} cy={26} rx={18} ry={8}
+        fill="rgba(255,240,160,0.18)" />
+    </svg>
+  )
 }
 
-// ── tiny color helper ────────────────────────────────────────────────
-function lighten(hex: string, amount: number): string {
-  const n = parseInt(hex.slice(1), 16)
-  const r = Math.min(255, ((n >> 16) & 0xff) + Math.round(255 * amount))
-  const g = Math.min(255, ((n >> 8) & 0xff) + Math.round(255 * amount))
-  const b = Math.min(255, (n & 0xff) + Math.round(255 * amount))
-  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`
+function LambChopSVG() {
+  // Lollipop-style lamb chop: round meat at top, long thin bone handle
+  return (
+    <svg width="80" height="80" viewBox="0 0 80 80">
+      {/* Bone shaft */}
+      <rect x="36" y="24" width="8" height="42" rx="4"
+        fill="#ece8e0" />
+      {/* Fat ring (white fat around base of meat) */}
+      <circle cx="40" cy="26" r="22"
+        fill="#f0ece4" />
+      {/* Meat — main round muscle */}
+      <circle cx="40" cy="26" r="18"
+        fill="#a03028" />
+      {/* Meat gradient for depth */}
+      <circle cx="40" cy="26" r="18"
+        fill="url(#meatgrad)" />
+      <defs>
+        <radialGradient id="meatgrad" cx="38%" cy="32%" r="60%">
+          <stop offset="0%" stopColor="#c84040" />
+          <stop offset="60%" stopColor="#8b2020" />
+          <stop offset="100%" stopColor="#5a1010" />
+        </radialGradient>
+      </defs>
+      {/* Marbling lines */}
+      <path d="M28,22 Q35,18 42,24 Q48,20 54,26"
+        stroke="rgba(240,200,180,0.35)" strokeWidth="1.8" fill="none"/>
+      <path d="M30,30 Q38,26 46,32"
+        stroke="rgba(240,200,180,0.25)" strokeWidth="1.4" fill="none"/>
+      {/* Fat edge (lighter outer ring) */}
+      <circle cx="40" cy="26" r="18"
+        fill="none" stroke="#e8c0a0" strokeWidth="3" strokeOpacity="0.55"/>
+      {/* Bone knob at bottom */}
+      <ellipse cx="40" cy="68" rx="9" ry="6"
+        fill="#ece8e0" stroke="#d0c8b8" strokeWidth="1"/>
+      {/* Bone knob highlight */}
+      <ellipse cx="37" cy="66" rx="3" ry="2"
+        fill="rgba(255,255,255,0.4)"/>
+      {/* Meat highlight */}
+      <circle cx="33" cy="20" r="6"
+        fill="rgba(255,180,160,0.2)"/>
+    </svg>
+  )
+}
+
+function ChickpeaSVG() {
+  // Three chickpeas with characteristic point + crease
+  return (
+    <svg width="80" height="80" viewBox="0 0 80 80">
+      <defs>
+        <radialGradient id="cpgrad" cx="35%" cy="30%" r="60%">
+          <stop offset="0%" stopColor="#e8c860"/>
+          <stop offset="55%" stopColor="#c49830"/>
+          <stop offset="100%" stopColor="#8a6818"/>
+        </radialGradient>
+        <radialGradient id="cpgrad2" cx="35%" cy="30%" r="60%">
+          <stop offset="0%" stopColor="#d4b448"/>
+          <stop offset="55%" stopColor="#b08020"/>
+          <stop offset="100%" stopColor="#785810"/>
+        </radialGradient>
+      </defs>
+      {/* Top chickpea */}
+      <circle cx="40" cy="25" r="16" fill="url(#cpgrad)"/>
+      {/* Characteristic pointed tip */}
+      <ellipse cx="40" cy="11" rx="4" ry="3.5" fill="#b89028"/>
+      <path d="M37,12 Q40,8 43,12" stroke="#9a7820" strokeWidth="1.5" fill="none"/>
+      {/* Crease */}
+      <path d="M28,28 Q40,34 52,28" stroke="#9a7820" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+      {/* Highlight */}
+      <circle cx="34" cy="18" r="5" fill="rgba(255,240,160,0.3)"/>
+
+      {/* Bottom-left chickpea */}
+      <circle cx="24" cy="54" r="14" fill="url(#cpgrad2)"/>
+      <ellipse cx="24" cy="42" rx="3.5" ry="3" fill="#a07818"/>
+      <path d="M14,57 Q24,62 34,57" stroke="#9a7820" strokeWidth="1.2" fill="none"/>
+      <circle cx="19" cy="47" r="4" fill="rgba(255,240,160,0.25)"/>
+
+      {/* Bottom-right chickpea */}
+      <circle cx="56" cy="54" r="14" fill="url(#cpgrad)"/>
+      <ellipse cx="56" cy="42" rx="3.5" ry="3" fill="#b08020"/>
+      <path d="M46,57 Q56,62 66,57" stroke="#9a7820" strokeWidth="1.2" fill="none"/>
+      <circle cx="51" cy="47" r="4" fill="rgba(255,240,160,0.25)"/>
+    </svg>
+  )
+}
+
+function SultanaSVG() {
+  // Dried sultana/raisin: plump, wrinkled, dark purple-red with stem
+  return (
+    <svg width="80" height="80" viewBox="0 0 80 80">
+      <defs>
+        <radialGradient id="sultgrad" cx="36%" cy="30%" r="65%">
+          <stop offset="0%" stopColor="#8b3060"/>
+          <stop offset="50%" stopColor="#5a1838"/>
+          <stop offset="100%" stopColor="#2a0818"/>
+        </radialGradient>
+      </defs>
+      {/* Main body — plump oval */}
+      <ellipse cx="40" cy="44" rx="26" ry="22" fill="url(#sultgrad)"/>
+      {/* Wrinkle lines (characteristic of dried fruit) */}
+      <path d="M20,40 Q26,44 20,50" stroke="#3a1028" strokeWidth="1.8" fill="none" strokeLinecap="round"/>
+      <path d="M26,34 Q32,40 28,48" stroke="#3a1028" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+      <path d="M40,33 Q44,42 40,52"  stroke="#3a1028" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+      <path d="M52,36 Q56,44 50,50"  stroke="#3a1028" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+      <path d="M57,42 Q62,46 57,52"  stroke="#3a1028" strokeWidth="1.8" fill="none" strokeLinecap="round"/>
+      {/* Bottom crease */}
+      <path d="M24,58 Q40,65 56,58" stroke="#3a1028" strokeWidth="1.5" fill="none"/>
+      {/* Stem */}
+      <path d="M40,22 Q42,16 38,10"
+        stroke="#4a2030" strokeWidth="3" fill="none" strokeLinecap="round"/>
+      {/* Stem tip */}
+      <circle cx="38" cy="10" r="2.5" fill="#3a1820"/>
+      {/* Highlight */}
+      <ellipse cx="30" cy="36" rx="8" ry="5"
+        fill="rgba(200,120,160,0.22)"/>
+      {/* Subtle rim */}
+      <ellipse cx="40" cy="44" rx="26" ry="22"
+        fill="none" stroke="rgba(160,80,120,0.4)" strokeWidth="1.5"/>
+    </svg>
+  )
 }
