@@ -35,7 +35,7 @@ export default function ScrollProgress() {
   }, [])
 
   return (
-    <div className="fixed right-6 top-1/2 -translate-y-1/2 z-50 hidden lg:flex flex-col items-center gap-1">
+    <div className="fixed right-6 top-24 z-50 hidden lg:flex flex-col items-center gap-1">
       {/* Vertical line track */}
       <div className="relative w-px h-48 bg-white/10 rounded-full overflow-hidden">
         <motion.div
